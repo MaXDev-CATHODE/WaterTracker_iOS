@@ -56,7 +56,7 @@ targets:
         INFOPLIST_FILE: WaterTrackerWidget/Info.plist
         CODE_SIGN_ENTITLEMENTS: WaterTrackerWidget/WaterTrackerWidget.entitlements
         TARGETED_DEVICE_FAMILY: "1"
-        APPLICATION_EXTENSION_API_ONLY: NO
+        APPLICATION_EXTENSION_API_ONLY: YES
     entitlements:
       path: WaterTrackerWidget/WaterTrackerWidget.entitlements
 
