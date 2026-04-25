@@ -57,16 +57,12 @@ jobs:
             -project WaterTracker.xcodeproj \
             -target WaterTracker \
             -configuration Release \
-            -destination "generic/platform=iOS" \
+            -sdk iphoneos \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            ONLY_ACTIVE_ARCH=NO \
-            -derivedDataPath build/DerivedData > build.log 2>&1
-          BUILD_EXIT=$?
-          echo "=== build.log (last 150 lines) ==="
-          tail -150 build.log
-          exit $BUILD_EXIT
+            -derivedDataPath build/DerivedData 2>&1 | tee build.log
+          exit ${PIPESTATUS[0]}
 
       # ── 7. Package .app into unsigned .ipa ───────────────────────────────────
       - name: Package unsigned IPA
