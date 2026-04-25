@@ -30,11 +30,13 @@ jobs:
       # ── 4. Generate .xcodeproj ───────────────────────────────────────────────
       - name: Generate Xcode project
         run: |
-          xcodegen generate --spec project.yml --verbose 2>&1
+          xcodegen generate --spec project.yml 2>&1
           echo "=== Generated files ==="
           ls -la
-          echo "=== project.pbxproj (first 100 lines) ==="
-          head -100 WaterTracker.xcodeproj/project.pbxproj || true
+          echo "=== Targets in pbxproj ==="
+          grep -E "isa = PBXNativeTarget" -A 5 WaterTracker.xcodeproj/project.pbxproj | grep "name = " || true
+          echo "=== xcodebuild list ==="
+          xcodebuild -project WaterTracker.xcodeproj -list 2>&1 || true
 
       # ── 5. List schemes ───────────────────────────────────────────────────────
       - name: List schemes and targets

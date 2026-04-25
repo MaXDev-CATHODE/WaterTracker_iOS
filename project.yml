@@ -26,7 +26,8 @@ targets:
         excludes:
           - "**/*.entitlements"
           - "**/*.plist"
-      - path: Shared
+      - path: Shared/WaterLogic.swift
+      - path: Shared/AppGroupStore.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.yourname.watertracker
@@ -47,7 +48,8 @@ targets:
         excludes:
           - "**/*.entitlements"
           - "**/*.plist"
-      - path: Shared
+      - path: Shared/WaterLogic.swift
+      - path: Shared/AppGroupStore.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.yourname.watertracker.widget
