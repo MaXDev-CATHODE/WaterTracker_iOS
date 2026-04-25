@@ -36,21 +36,17 @@ jobs:
       - name: List schemes and targets
         run: |
           echo "=== xcodebuild -list ==="
-          xcodebuild -project WaterTracker.xcodeproj -list 2>&1 | tee schemes.txt || true
-          echo "=== project.pbxproj targets ==="
-          grep -E "name = |isa = PBXNativeTarget" WaterTracker.xcodeproj/project.pbxproj | head -20 || true
-
-      - name: Upload schemes list
-        uses: actions/upload-artifact@v4
-        with:
-          name: schemes-list
-          path: schemes.txt
-          retention-days: 7
+          xcodebuild -project WaterTracker.xcodeproj -list 2>&1 || true
+          echo ""
+          echo "=== PBXNativeTarget names ==="
+          grep -A2 "isa = PBXNativeTarget" WaterTracker.xcodeproj/project.pbxproj | grep "name = " || true
+          echo ""
+          echo "=== All target names ==="
+          grep "name = " WaterTracker.xcodeproj/project.pbxproj | grep -v "//" | head -30 || true
 
       # ── 6. Build WaterTracker app (no signing) ────────────────────────────────
       - name: Build app (unsigned)
         run: |
-          # Hard-code target name from project.yml
           xcodebuild build \
             -project WaterTracker.xcodeproj \
             -target WaterTracker \
@@ -62,8 +58,8 @@ jobs:
             ONLY_ACTIVE_ARCH=NO \
             -derivedDataPath build/DerivedData > build.log 2>&1
           BUILD_EXIT=$?
-          echo "=== Last 100 lines of build.log ==="
-          tail -100 build.log
+          echo "=== build.log (last 150 lines) ==="
+          tail -150 build.log
           exit $BUILD_EXIT
 
       # ── 7. Package .app into unsigned .ipa ───────────────────────────────────
