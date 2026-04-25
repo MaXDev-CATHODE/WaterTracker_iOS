@@ -3,12 +3,12 @@ name: Build WaterTracker IPA
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:   # allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build unsigned IPA
-    runs-on: macos-14   # Xcode 15 is available on macos-14
+    runs-on: macos-14
 
     steps:
       # ── 1. Checkout ──────────────────────────────────────────────────────────
@@ -17,19 +17,29 @@ jobs:
 
       # ── 2. Select Xcode 15 ───────────────────────────────────────────────────
       - name: Select Xcode 15
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+          xcodebuild -version
 
       # ── 3. Install XcodeGen ──────────────────────────────────────────────────
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      # ── 4. Generate .xcodeproj from project.yml ──────────────────────────────
+      # ── 4. Generate .xcodeproj ───────────────────────────────────────────────
       - name: Generate Xcode project
-        run: xcodegen generate
+        run: |
+          xcodegen generate --spec project.yml
+          ls -la
 
-      # ── 6. Build (no signing) ────────────────────────────────────────────────
+      # ── 5. Show available schemes ─────────────────────────────────────────────
+      - name: List schemes
+        run: |
+          xcodebuild -project WaterTracker.xcodeproj -list
+
+      # ── 6. Build WaterTracker app (no signing) ────────────────────────────────
       - name: Build app (unsigned)
         run: |
+          set -o pipefail
           xcodebuild build \
             -project WaterTracker.xcodeproj \
             -scheme WaterTracker \
@@ -39,20 +49,46 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             ONLY_ACTIVE_ARCH=NO \
-            -derivedDataPath build/DerivedData
+            -derivedDataPath build/DerivedData \
+            | xcpretty --color || xcodebuild build \
+              -project WaterTracker.xcodeproj \
+              -scheme WaterTracker \
+              -configuration Release \
+              -destination "generic/platform=iOS" \
+              CODE_SIGN_IDENTITY="" \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGNING_ALLOWED=NO \
+              ONLY_ACTIVE_ARCH=NO \
+              -derivedDataPath build/DerivedData
 
-      # ── 7. Package .app into unsigned .ipa ───────────────────────────────────
+      # ── 7. Build Widget Extension ─────────────────────────────────────────────
+      - name: Build widget (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project WaterTracker.xcodeproj \
+            -scheme WaterTrackerWidget \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=NO \
+            -derivedDataPath build/DerivedData 2>&1 | tail -50 || true
+
+      # ── 8. Package .app into unsigned .ipa ───────────────────────────────────
       - name: Package unsigned IPA
         run: |
-          APP_PATH=$(find build/DerivedData -name "WaterTracker.app" -not -path "*/Test*" | head -1)
+          APP_PATH=$(find build/DerivedData -name "WaterTracker.app" \
+            -not -path "*/Test*" -not -path "*Widget*" | head -1)
           echo "Found app at: $APP_PATH"
           mkdir -p build/Payload
           cp -r "$APP_PATH" build/Payload/WaterTracker.app
           cd build
           zip -r WaterTracker-unsigned.ipa Payload
-          echo "IPA created: $(du -sh WaterTracker-unsigned.ipa)"
+          echo "IPA size: $(du -sh WaterTracker-unsigned.ipa)"
 
-      # ── 8. Upload IPA as artifact ─────────────────────────────────────────────
+      # ── 9. Upload IPA as artifact ─────────────────────────────────────────────
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
