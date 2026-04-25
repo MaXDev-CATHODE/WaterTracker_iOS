@@ -55,7 +55,7 @@ jobs:
         run: |
           xcodebuild build \
             -project WaterTracker.xcodeproj \
-            -target WaterTracker \
+            -scheme WaterTracker \
             -configuration Release \
             -sdk iphoneos \
             CODE_SIGN_IDENTITY="" \
