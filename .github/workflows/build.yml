@@ -29,12 +29,13 @@ jobs:
       - name: Generate Xcode project
         run: |
           xcodegen generate --spec project.yml
+          echo "Generated files:"
           ls -la
 
-      # ── 5. Show available schemes ─────────────────────────────────────────────
+      # ── 5. List schemes ───────────────────────────────────────────────────────
       - name: List schemes
         run: |
-          xcodebuild -project WaterTracker.xcodeproj -list
+          xcodebuild -project WaterTracker.xcodeproj -list 2>&1 || true
 
       # ── 6. Build WaterTracker app (no signing) ────────────────────────────────
       - name: Build app (unsigned)
@@ -42,45 +43,26 @@ jobs:
           set -o pipefail
           xcodebuild build \
             -project WaterTracker.xcodeproj \
-            -scheme WaterTracker \
+            -target WaterTracker \
             -configuration Release \
             -destination "generic/platform=iOS" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             ONLY_ACTIVE_ARCH=NO \
-            -derivedDataPath build/DerivedData \
-            | xcpretty --color || xcodebuild build \
-              -project WaterTracker.xcodeproj \
-              -scheme WaterTracker \
-              -configuration Release \
-              -destination "generic/platform=iOS" \
-              CODE_SIGN_IDENTITY="" \
-              CODE_SIGNING_REQUIRED=NO \
-              CODE_SIGNING_ALLOWED=NO \
-              ONLY_ACTIVE_ARCH=NO \
-              -derivedDataPath build/DerivedData
+            -derivedDataPath build/DerivedData 2>&1 | tee build.log | tail -100
+          # If xcpretty failed, show raw log
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "=== FULL BUILD LOG ==="
+            cat build.log | grep -E "error:|warning:|note:" | head -50
+            exit 1
+          fi
 
-      # ── 7. Build Widget Extension ─────────────────────────────────────────────
-      - name: Build widget (unsigned)
-        run: |
-          set -o pipefail
-          xcodebuild build \
-            -project WaterTracker.xcodeproj \
-            -scheme WaterTrackerWidget \
-            -configuration Release \
-            -destination "generic/platform=iOS" \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            ONLY_ACTIVE_ARCH=NO \
-            -derivedDataPath build/DerivedData 2>&1 | tail -50 || true
-
-      # ── 8. Package .app into unsigned .ipa ───────────────────────────────────
+      # ── 7. Package .app into unsigned .ipa ───────────────────────────────────
       - name: Package unsigned IPA
         run: |
           APP_PATH=$(find build/DerivedData -name "WaterTracker.app" \
-            -not -path "*/Test*" -not -path "*Widget*" | head -1)
+            -not -path "*/Test*" | head -1)
           echo "Found app at: $APP_PATH"
           mkdir -p build/Payload
           cp -r "$APP_PATH" build/Payload/WaterTracker.app
@@ -88,10 +70,19 @@ jobs:
           zip -r WaterTracker-unsigned.ipa Payload
           echo "IPA size: $(du -sh WaterTracker-unsigned.ipa)"
 
-      # ── 9. Upload IPA as artifact ─────────────────────────────────────────────
+      # ── 8. Upload IPA as artifact ─────────────────────────────────────────────
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: WaterTracker-unsigned-ipa
           path: build/WaterTracker-unsigned.ipa
           retention-days: 30
+
+      # ── 9. Upload build log on failure ───────────────────────────────────────
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          retention-days: 7
