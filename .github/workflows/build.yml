@@ -33,16 +33,24 @@ jobs:
           ls -la
 
       # ── 5. List schemes ───────────────────────────────────────────────────────
-      - name: List schemes
+      - name: List schemes and targets
         run: |
+          echo "=== xcodebuild -list ==="
           xcodebuild -project WaterTracker.xcodeproj -list 2>&1 || true
+          echo "=== project.pbxproj targets ==="
+          grep -E "name = |isa = PBXNativeTarget" WaterTracker.xcodeproj/project.pbxproj | head -20 || true
 
       # ── 6. Build WaterTracker app (no signing) ────────────────────────────────
       - name: Build app (unsigned)
         run: |
+          # Try building with -target first, fall back to first available target
+          TARGETS=$(xcodebuild -project WaterTracker.xcodeproj -list 2>/dev/null | grep -A 20 "Targets:" | grep "    " | head -5 | xargs)
+          echo "Available targets: $TARGETS"
+          FIRST_TARGET=$(echo $TARGETS | awk '{print $1}')
+          echo "Building target: $FIRST_TARGET"
           xcodebuild build \
             -project WaterTracker.xcodeproj \
-            -target WaterTracker \
+            -target "$FIRST_TARGET" \
             -configuration Release \
             -destination "generic/platform=iOS" \
             CODE_SIGN_IDENTITY="" \
