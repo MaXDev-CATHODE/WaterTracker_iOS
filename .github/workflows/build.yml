@@ -40,7 +40,6 @@ jobs:
       # ── 6. Build WaterTracker app (no signing) ────────────────────────────────
       - name: Build app (unsigned)
         run: |
-          set -o pipefail
           xcodebuild build \
             -project WaterTracker.xcodeproj \
             -target WaterTracker \
@@ -50,13 +49,10 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             ONLY_ACTIVE_ARCH=NO \
-            -derivedDataPath build/DerivedData 2>&1 | tee build.log | tail -100
-          # If xcpretty failed, show raw log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "=== FULL BUILD LOG ==="
-            cat build.log | grep -E "error:|warning:|note:" | head -50
-            exit 1
-          fi
+            -derivedDataPath build/DerivedData > build.log 2>&1
+          BUILD_EXIT=$?
+          tail -100 build.log
+          exit $BUILD_EXIT
 
       # ── 7. Package .app into unsigned .ipa ───────────────────────────────────
       - name: Package unsigned IPA
