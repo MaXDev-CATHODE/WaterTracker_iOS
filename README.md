@@ -43,6 +43,17 @@ Aplikacja iOS do śledzenia dziennego spożycia wody. Składa się z aplikacji g
    - Znajdź swoje Apple ID i kliknij **Zaufaj „Twoje Apple ID"**
    - Potwierdź kliknięciem **Zaufaj**
 
+### Dodawanie jako źródło (AltStore Source)
+
+Aby otrzymywać powiadomienia o aktualizacjach bezpośrednio w AltStore:
+1. Skopiuj link do pliku `apps.json` ze swojego repozytorium (pamiętaj o użyciu wersji "Raw" z GitHub).
+   - Przykład: `https://raw.githubusercontent.com/TWÓJ_LOGIN/WaterTracker_iOS/master/apps.json`
+2. W AltStore przejdź do zakładki **Browse**.
+3. Kliknij **Sources** w prawym górnym rogu.
+4. Kliknij **Add** i wklej skopiowany link.
+
+> **Ważne:** Upewnij się, że w pliku `apps.json` podmieniłeś `yourname` na swój Team ID / identyfikator.
+
 ---
 
 ## Instalacja przez Sideloadly

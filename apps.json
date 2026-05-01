@@ -1,0 +1,22 @@
+{
+  "name": "WaterTracker Source",
+  "identifier": "com.8FXQF8BCX4.watertracker.source",
+  "subtitle": "Daily hydration tracker",
+  "description": "Stay hydrated with ease using WaterTracker. Minimalist design, Widget support, and privacy-focused.",
+  "iconURL": "https://raw.githubusercontent.com/MaXDev-CATHODE/WaterTracker_iOS/master/icon.png",
+  "apps": [
+    {
+      "name": "WaterTracker",
+      "bundleIdentifier": "com.8FXQF8BCX4.watertracker",
+      "developerName": "MaXDev-CATHODE",
+      "version": "1.0",
+      "versionDate": "2026-05-01T12:00:00Z",
+      "versionDescription": "Wersja 1.0 - Pierwsze wydanie. Zawiera licznik wody i widget.",
+      "downloadURL": "https://github.com/MaXDev-CATHODE/WaterTracker_iOS/releases/latest/download/WaterTracker-unsigned.ipa",
+      "localizedDescription": "Aplikacja do śledzenia spożycia wody z pięknym interfejsem SwiftUI.",
+      "iconURL": "https://raw.githubusercontent.com/MaXDev-CATHODE/WaterTracker_iOS/master/icon.png",
+      "screenshotURLs": [],
+      "size": 0
+    }
+  ]
+}

@@ -18,3 +18,10 @@ Package.swift
 
 # Kiro
 .kiro/
+.agents/
+.specify/
+specs/
+scratch/
+.agent/
+plan.md
+tasks.md
