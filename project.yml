@@ -30,7 +30,7 @@ targets:
       - path: Shared/AppGroupStore.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.watertracker
+        PRODUCT_BUNDLE_IDENTIFIER: com.8FXQF8BCX4.watertracker
         INFOPLIST_FILE: WaterTracker/Info.plist
         CODE_SIGN_ENTITLEMENTS: WaterTracker/WaterTracker.entitlements
         TARGETED_DEVICE_FAMILY: "1"
@@ -38,6 +38,8 @@ targets:
         ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
     entitlements:
       path: WaterTracker/WaterTracker.entitlements
+    dependencies:
+      - target: WaterTrackerWidget
 
   WaterTrackerWidget:
     type: app-extension
